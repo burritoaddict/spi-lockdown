@@ -8,7 +8,8 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("burrito");
-MODULE_DESCRIPTION("");
+MODULE_DESCRIPTION("Creates sysctl interface to make SPI protected range "
+    "(and other) registers immutable");
 MODULE_VERSION("0.1");
 
 u32 flockdn_flag = 0;
