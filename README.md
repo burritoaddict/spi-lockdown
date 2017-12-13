@@ -3,16 +3,17 @@
 This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
 
 Enabling FLOCKDN prevents SPI protected memory range registers from being
-modified. (See: Section 21.4.2 in Intel® 8 Series/C220 Series Chipset
-Family Platform Controller Hub (PCH) - Datasheet)
+modified. (See: Section 21.4.2 in [Intel® 8 Series PCH
+Datasheet](https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/8-series-chipset-pch-datasheet.pdf))
 
-This module is meant to be used as part of a SecureBoot environment.
-Where it is hardened such that there is no /dev/mem access or privileged
+This module is meant to be used as part of a
+[SecureBoot](https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html) environment.
+Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that there is [no /dev/mem access](https://cateee.net/lkddb/web-lkddb/STRICT_DEVMEM.html) or privileged
 IO available. (because if you have those things you can just do this
 from userspace)
 
-Tested on debian, 3.16 kernel, and ICH10R LPC Interface
-Controller
+Tested on debian, 3.16 kernel, and [ICH10R LPC Interface
+Controller](https://www.intel.ca/content/dam/doc/datasheet/io-controller-hub-10-family-datasheet.pdf)
 
 ## Installation and Usage
 
@@ -24,8 +25,7 @@ Controller
     sysctl -w dev.spi_lockdown.flockdn=1
 
 Note: flockdn cannot be disabled after running sysctl without a 'reset'.
-On some systems that means waking from sleep ( For example:
-https://support.apple.com/en-ca/HT204934)
+[On some systems that means waking from sleep](https://support.apple.com/en-ca/HT204934)
 
 ## TODO
 
