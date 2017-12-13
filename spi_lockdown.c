@@ -89,7 +89,7 @@ int spi_lockdown_init(void){
 
   printk(KERN_INFO "spi_lockdown loading\n");
 
-  printk(KERN_DEBUG "Searching for input controller hub\n");
+  printk(KERN_DEBUG "Searching for interface controller hub\n");
 
   for(i = 0; i < sizeof(lpc_ich_ids) / sizeof(struct pci_device_id); i++){
     struct pci_dev *dev = NULL;
@@ -116,7 +116,6 @@ int spi_lockdown_init(void){
       printk(KERN_DEBUG "Got vendor: %d, device: %d\n", dev->vendor,
           dev->device);
 
-      // Okay, we found an input controller hub. try to grab SPIBAR!
       pci_read_config_dword(dev, RCBABASE, &rcba);
 
       printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
