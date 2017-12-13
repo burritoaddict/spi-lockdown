@@ -1,6 +1,6 @@
 # SPI Lockdown Kernel Module
 
-This kernel module enables FLOCKDN on supported SPI controllers.
+This kernel module exposes the FLOCKDN on x86 systems bit via sysctl.
 
 Enabling FLOCKDN prevents SPI protected memory ranges from being
 modified, and is recommended to prevent unwanted firmware modifications.
@@ -33,3 +33,5 @@ Controller
 
 * http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf
 * https://github.com/chipsec/chipsec/
+* https://www.kernel.org/doc/Documentation/PCI/pci.txt
+* https://static.lwn.net/images/pdf/LDD3/ch09.pdf
