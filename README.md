@@ -16,12 +16,12 @@ Controller
 
 ## Installation and Usage
 
-* apt-get install linux-headers-$(uname -r)
-* git clone git@github.com:burritoaddict/spi-lockdown.git
-* cd spi-lockdown
-* make
-* insmod spi_lockdown.ko
-* sysctl -w dev.spi_lockdown.flockdn=1
+    apt-get install linux-headers-$(uname -r)
+    git clone git@github.com:burritoaddict/spi-lockdown.git
+    cd spi-lockdown
+    make
+    insmod spi_lockdown.ko
+    sysctl -w dev.spi_lockdown.flockdn=1
 
 Note: flockdn cannot be disabled after running sysctl without a 'reset'.
 On some systems that means waking from sleep ( For example:
