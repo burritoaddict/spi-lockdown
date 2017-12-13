@@ -64,7 +64,7 @@ int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
 
     printk(KERN_INFO "spi_lockdown writing FLOCKDN");
 
-    hsfsts_target = ioremap_nocache(spi_base + 0x4,
+    hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
         sizeof(hsfsts.regval));
 
     hsfsts.regval = readw(hsfsts_target);
@@ -124,7 +124,7 @@ int spi_lockdown_init(void){
 
       printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
 
-      hsfsts_target = ioremap_nocache(spi_base + 0x4,
+      hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
           sizeof(hsfsts.regval));
 
       hsfsts.regval = readw(hsfsts_target);
