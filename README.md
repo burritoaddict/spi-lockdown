@@ -22,6 +22,7 @@ Controller
 
 ## TODO
 
+* Review datasheets for all the chipsets dumped into lpc_chipsets :(
 * Error handling and cleanup
 * Support more ICH
 * Expose SPI protected memory ranges
@@ -38,3 +39,4 @@ Controller
 * https://github.com/chipsec/chipsec/
 * https://www.kernel.org/doc/Documentation/PCI/pci.txt
 * https://static.lwn.net/images/pdf/LDD3/ch09.pdf
+* https://github.com/torvalds/linux/blob/master/drivers/mfd/lpc_ich.c
