@@ -707,4 +707,4 @@ static const struct pci_device_id lpc_ich_ids[] = {
 };
 
 int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
-     19     void __user *buffer, size_t *lenp, loff_t *ppos);
+    void __user *buffer, size_t *lenp, loff_t *ppos);
