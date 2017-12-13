@@ -59,6 +59,12 @@ int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
       return -1;
     }
 
+    if(!spi_base){
+      printk(KERN_ERR "Cannot set FLOCKDN because we were unable to "
+          "locate SPIBAR\n");
+      return -1;
+    }
+
     printk(KERN_INFO "spi_lockdown writing FLOCKDN");
 
     hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
@@ -92,30 +98,40 @@ int spi_lockdown_init(void){
 
       priv = pci_get_drvdata(dev);
 
-      if(lpc_chipset_info[priv->chipset].spi_type != INTEL_SPI_LPT) {
-        printk(
+      switch(lpc_chipset_info[priv->chipset].spi_type){
+        case INTEL_SPI_LPT:
+          spi_base = rcba = bcr = 0;
+
+          printk(KERN_DEBUG "Got vendor: %d, device: %d\n", dev->vendor,
+              dev->device);
+          pci_read_config_dword(dev, RCBABASE, &rcba);
+          printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
+          spi_base = round_down(rcba, SPIBASE_LPT_SZ) + SPIBASE_LPT;
+          printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
+          hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
+              sizeof(hsfsts.regval));
+          hsfsts.regval = readw(hsfsts_target);
+          flockdn_flag = hsfsts.hsf_status.flockdn;
+          iounmap(hsfsts_target);
+
+          return 0;
+          break; /* unreachable */
+
+        case INTEL_SPI_BYT:
+          pci_read_config_dword(dev, SPIBASE_BYT, &spi_base);
+          spi_base = spi_base & ~(SPIBASE_BYT_SZ - 1);
+          // TODO: investigate if we can actually read HSFS from this.
+
+        case INTEL_SPI_BXT:
+// http://elixir.free-electrons.com/linux/latest/source/drivers/mfd/lpc_ich.c#L1128
+        default:
+          printk(
             KERN_ERR
             "Unsupported ICH detected. (CHIPSET: %.2x, SPI_TYPE: %.2x)\n",
             priv->chipset, lpc_chipset_info[priv->chipset].spi_type
-        );
-        continue;
+          );
+          break;
       }
-
-      spi_base = rcba = bcr = 0;
-
-      printk(KERN_DEBUG "Got vendor: %d, device: %d\n", dev->vendor,
-          dev->device);
-      pci_read_config_dword(dev, RCBABASE, &rcba);
-      printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
-      spi_base = round_down(rcba, SPIBASE_LPT_SZ) + SPIBASE_LPT;
-      printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
-      hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
-          sizeof(hsfsts.regval));
-      hsfsts.regval = readw(hsfsts_target);
-      flockdn_flag = hsfsts.hsf_status.flockdn;
-      iounmap(hsfsts_target);
-
-      return 0;
     }
   }
 

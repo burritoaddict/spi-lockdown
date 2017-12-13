@@ -1,6 +1,11 @@
 #define SPIBASE_LPT 0x3800
 #define SPIBASE_LPT_SZ 512
 #define SPIBASE_LPT_HSFS_OFFSET 0x4
+
+#define SPIBASE_BYT		0x54
+#define SPIBASE_BYT_SZ		512
+#define SPIBASE_BYT_EN		BIT(1)
+
 #define RCBABASE 0xf0
 
 union ich_hws_flash_status {
