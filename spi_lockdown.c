@@ -11,9 +11,6 @@ MODULE_AUTHOR("burrito");
 MODULE_DESCRIPTION("");
 MODULE_VERSION("0.1");
 
-#define KERN_SPI_LOCKDOWN 710
-#define FLOCKDN_FLAG 1
-
 u32 flockdn_flag = 0;
 union ich_hws_flash_status hsfsts;
 u32 spi_base = 0;
@@ -62,7 +59,7 @@ int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     if(!flockdn_flag){
       printk(KERN_ERR "you can't disable FLOCKDN once it is enabled\n");
       flockdn_flag = 1;
-      return 0;
+      return -1;
     }
 
     printk(KERN_INFO "spi_lockdown writing FLOCKDN");
@@ -136,25 +133,13 @@ int spi_lockdown_init(void){
       flockdn_flag = hsfsts.hsf_status.flockdn;
 
       iounmap(hsfsts_target);
-/*
-      printk(KERN_INFO "hsfsts.flcdone = %.1x\n",
-          hsfsts.hsf_status.flcdone);
-      printk(KERN_INFO "hsfsts.dael = %.1x\n",
-          hsfsts.hsf_status.dael);
-      printk(KERN_INFO "hsfsts.berasesz = %.1x\n",
-          hsfsts.hsf_status.berasesz);
-      printk(KERN_INFO "hsfsts.flcinprog = %.1x\n",
-          hsfsts.hsf_status.flcinprog);
-      printk(KERN_INFO "hsfsts.fldesvalid = %.1x\n",
-          hsfsts.hsf_status.fldesvalid);
-      printk(KERN_INFO "hsfsts.flockdn = %.1x\n",
-          hsfsts.hsf_status.flockdn);
-*/
+
       return 0;
     }
   }
 
-  return 1;
+  unregister_sysctl_table(spi_lockdown_ctl_table_header);
+  return -ENXIO;
 }
 
 void spi_lockdown_exit(void){
