@@ -2,6 +2,8 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
+#include <linux/sysctl.h>
+
 #include "spi_lockdown.h"
 
 MODULE_LICENSE("GPL");
@@ -9,29 +11,103 @@ MODULE_AUTHOR("burrito");
 MODULE_DESCRIPTION("");
 MODULE_VERSION("0.1");
 
+#define KERN_SPI_LOCKDOWN 710
+#define FLOCKDN_FLAG 1
+
+u32 flockdn_flag = 0;
+union ich_hws_flash_status hsfsts;
+u32 spi_base = 0;
+
+int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
+    void __user *buffer, size_t *lenp, loff_t *ppos);
+
+static ctl_table spi_lockdown_table[] = {
+  {
+    .procname = "flockdn",
+    .data = &flockdn_flag,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &flockdn_sysctl_handler,
+  }, {0}
+};
+
+static ctl_table spi_lockdown_dev_table[] = {
+	{
+    .procname = "spi_lockdown",
+    .mode = 0555,
+    .child = spi_lockdown_table
+  }, {0}
+};
+
+static ctl_table spi_lockdown_root_table[] = {
+	{
+    .procname = "dev",
+    .mode = 0555,
+    .child = spi_lockdown_dev_table
+  }, {0}
+};
+
+static struct ctl_table_header *spi_lockdown_ctl_table_header;
+
+int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
+    void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+  int ret;
+
+  ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+
+  if(write) {
+    void * hsfsts_target = 0;
+
+    if(!flockdn_flag){
+      printk(KERN_ERR "you can't disable FLOCKDN once it is enabled\n");
+      flockdn_flag = 1;
+      return 0;
+    }
+
+    printk(KERN_INFO "spi_lockdown writing FLOCKDN");
+
+    hsfsts_target = ioremap_nocache(spi_base + 0x4,
+        sizeof(hsfsts.regval));
+
+    hsfsts.regval = readw(hsfsts_target);
+
+    flockdn_flag = hsfsts.hsf_status.flockdn;
+
+    hsfsts.hsf_status.flockdn = 1;
+
+    writew(hsfsts.regval, hsfsts_target);
+
+    iounmap(hsfsts_target);
+  }
+
+  return 0;
+}
+
 int spi_lockdown_init(void){
   int i;
 
-  printk(KERN_INFO "spi_lockdown attempting to lock spi_flash permissions\n");
+  spi_lockdown_ctl_table_header = register_sysctl_table(
+      spi_lockdown_root_table);
 
-  printk(KERN_INFO "Searching for input controller hub\n");
+  printk(KERN_INFO "spi_lockdown loading\n");
+
+  printk(KERN_DEBUG "Searching for input controller hub\n");
 
   for(i = 0; i < sizeof(lpc_ich_ids) / sizeof(struct pci_device_id); i++){
     struct pci_dev *dev = NULL;
 
     while ((dev = pci_get_device(lpc_ich_ids[i].vendor,
             lpc_ich_ids[i].device, dev))){
-      u32 spi_base, rcba, bcr;
-      union ich_hws_flash_status hsfsts;
-      void * hsfsts_target;
-
+      u32 rcba, bcr;
+      void * hsfsts_target = 0;
       struct lpc_ich_priv *priv;
 
       priv = pci_get_drvdata(dev);
 
       if(lpc_chipset_info[priv->chipset].spi_type != INTEL_SPI_LPT) {
         printk(
-            KERN_INFO
+            KERN_ERR
             "Unsupported ICH detected. (CHIPSET: %.2x, SPI_TYPE: %.2x)\n",
             priv->chipset, lpc_chipset_info[priv->chipset].spi_type
         );
@@ -40,23 +116,27 @@ int spi_lockdown_init(void){
 
       spi_base = rcba = bcr = 0;
 
-      printk(KERN_INFO "Got vendor: %d, device: %d\n", dev->vendor,
+      printk(KERN_DEBUG "Got vendor: %d, device: %d\n", dev->vendor,
           dev->device);
 
       // Okay, we found an input controller hub. try to grab SPIBAR!
       pci_read_config_dword(dev, RCBABASE, &rcba);
 
-      printk(KERN_INFO "RCBA base: 0x%.8x\n", rcba);
+      printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
 
       spi_base = round_down(rcba, SPIBASE_LPT_SZ) + SPIBASE_LPT;
 
-      printk(KERN_INFO "SPI base: 0x%.8x\n", spi_base);
+      printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
 
       hsfsts_target = ioremap_nocache(spi_base + 0x4,
           sizeof(hsfsts.regval));
 
       hsfsts.regval = readw(hsfsts_target);
 
+      flockdn_flag = hsfsts.hsf_status.flockdn;
+
+      iounmap(hsfsts_target);
+/*
       printk(KERN_INFO "hsfsts.flcdone = %.1x\n",
           hsfsts.hsf_status.flcdone);
       printk(KERN_INFO "hsfsts.dael = %.1x\n",
@@ -69,20 +149,18 @@ int spi_lockdown_init(void){
           hsfsts.hsf_status.fldesvalid);
       printk(KERN_INFO "hsfsts.flockdn = %.1x\n",
           hsfsts.hsf_status.flockdn);
-
-      hsfsts.hsf_status.flockdn = 1;
-
-      writew(hsfsts.regval, hsfsts_target);
-
-      iounmap(hsfsts_target);
+*/
+      return 0;
     }
   }
 
-  return 0;
+  return 1;
 }
 
 void spi_lockdown_exit(void){
   printk(KERN_INFO "spi_lockdown unloading\n");
+
+  unregister_sysctl_table(spi_lockdown_ctl_table_header);
 }
 
 module_init(spi_lockdown_init);
