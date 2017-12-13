@@ -6,6 +6,11 @@ Enabling FLOCKDN prevents SPI protected memory ranges from being
 modified, and is recommended to prevent unwanted firmware modifications.
 
 This module is meant to be used as part of a SecureBoot environment.
+Where it is hardened such that there is no /dev/mem access or privileged
+IO available.
+
+Note: tested on debian, 3.16 kernel, and ICH10R LPC Interface
+Controller
 
 ## Usage
 
@@ -22,8 +27,9 @@ This module is meant to be used as part of a SecureBoot environment.
 * Expose Flash Region Access Permissions Register
 * Expose Software Sequencing Flash Control Register
 * Expose flash descriptor region and mark unwritable
+* Instructions for statically linking into kernel
 
-## references
+## References
 
 * http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf
 * https://github.com/chipsec/chipsec/
