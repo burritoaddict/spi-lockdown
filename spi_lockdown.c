@@ -63,15 +63,10 @@ int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
 
     hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
         sizeof(hsfsts.regval));
-
     hsfsts.regval = readw(hsfsts_target);
-
     flockdn_flag = hsfsts.hsf_status.flockdn;
-
     hsfsts.hsf_status.flockdn = 1;
-
     writew(hsfsts.regval, hsfsts_target);
-
     iounmap(hsfsts_target);
   }
 
@@ -85,8 +80,6 @@ int spi_lockdown_init(void){
       spi_lockdown_root_table);
 
   printk(KERN_INFO "spi_lockdown loading\n");
-
-  printk(KERN_DEBUG "Searching for interface controller hub\n");
 
   for(i = 0; i < sizeof(lpc_ich_ids) / sizeof(struct pci_device_id); i++){
     struct pci_dev *dev = NULL;
@@ -112,22 +105,14 @@ int spi_lockdown_init(void){
 
       printk(KERN_DEBUG "Got vendor: %d, device: %d\n", dev->vendor,
           dev->device);
-
       pci_read_config_dword(dev, RCBABASE, &rcba);
-
       printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
-
       spi_base = round_down(rcba, SPIBASE_LPT_SZ) + SPIBASE_LPT;
-
       printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
-
       hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
           sizeof(hsfsts.regval));
-
       hsfsts.regval = readw(hsfsts_target);
-
       flockdn_flag = hsfsts.hsf_status.flockdn;
-
       iounmap(hsfsts_target);
 
       return 0;
