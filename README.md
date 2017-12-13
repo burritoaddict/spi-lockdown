@@ -47,3 +47,4 @@ https://support.apple.com/en-ca/HT204934)
 * https://www.kernel.org/doc/Documentation/PCI/pci.txt
 * https://static.lwn.net/images/pdf/LDD3/ch09.pdf
 * https://github.com/torvalds/linux/blob/master/drivers/mfd/lpc_ich.c
+* http://www.intelsecurity.com/advanced-threat-research/content/AttackingAndDefendingBIOS-RECon2015.pdf
