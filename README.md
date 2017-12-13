@@ -2,14 +2,14 @@
 
 This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
 
-Enabling FLOCKDN prevents SPI protected memory ranges from being
-modified, and is recommended to prevent unwanted firmware modifications.
+Enabling FLOCKDN prevents SPI protected memory range registers from being
+modified.
 
 This module is meant to be used as part of a SecureBoot environment.
 Where it is hardened such that there is no /dev/mem access or privileged
 IO available.
 
-Note: tested on debian, 3.16 kernel, and ICH10R LPC Interface
+Tested on debian, 3.16 kernel, and ICH10R LPC Interface
 Controller
 
 ## Usage
