@@ -26,7 +26,7 @@ static ctl_table spi_lockdown_table[] = {
 };
 
 static ctl_table spi_lockdown_dev_table[] = {
-	{
+  {
     .procname = "spi_lockdown",
     .mode = 0555,
     .child = spi_lockdown_table
@@ -34,7 +34,7 @@ static ctl_table spi_lockdown_dev_table[] = {
 };
 
 static ctl_table spi_lockdown_root_table[] = {
-	{
+  {
     .procname = "dev",
     .mode = 0555,
     .child = spi_lockdown_dev_table
