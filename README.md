@@ -8,7 +8,7 @@ Datasheet](https://www.intel.com/content/dam/www/public/us/en/documents/datashee
 
 This module is meant to be used as part of a
 [SecureBoot](https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html) environment.
-Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that there is [no /dev/mem access](https://cateee.net/lkddb/web-lkddb/STRICT_DEVMEM.html) or privileged
+Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that there is [no /dev/mem access](https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Deny_reading/writing_to_/dev/kmem,_/dev/mem,_and_/dev/port) or privileged
 IO available. (because if you have those things you can just do this
 from userspace)
 
