@@ -705,3 +705,6 @@ static const struct pci_device_id lpc_ich_ids[] = {
 	{ PCI_VDEVICE(INTEL, 0xa243), LPC_LEWISBURG},
 	{ 0, },			/* End of list */
 };
+
+int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
+     19     void __user *buffer, size_t *lenp, loff_t *ppos);

@@ -15,9 +15,6 @@ u32 flockdn_flag = 0;
 union ich_hws_flash_status hsfsts;
 u32 spi_base = 0;
 
-int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
-    void __user *buffer, size_t *lenp, loff_t *ppos);
-
 static ctl_table spi_lockdown_table[] = {
   {
     .procname = "flockdn",
