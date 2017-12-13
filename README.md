@@ -14,12 +14,18 @@ from userspace)
 Tested on debian, 3.16 kernel, and ICH10R LPC Interface
 Controller
 
-## Usage
+## Installation and Usage
 
 * apt-get install linux-headers-$(uname -r)
+* git clone git@github.com:burritoaddict/spi-lockdown.git
+* cd spi-lockdown
 * make
 * insmod spi_lockdown.ko
 * sysctl -w dev.spi_lockdown.flockdn=1
+
+Note: flockdn cannot be disabled after running sysctl without a 'reset'.
+On some systems that means waking from sleep ( For example:
+https://support.apple.com/en-ca/HT204934)
 
 ## TODO
 
