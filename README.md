@@ -8,7 +8,8 @@ Family Platform Controller Hub (PCH) - Datasheet)
 
 This module is meant to be used as part of a SecureBoot environment.
 Where it is hardened such that there is no /dev/mem access or privileged
-IO available.
+IO available. (because if you have those things you can just do this
+from userspace)
 
 Tested on debian, 3.16 kernel, and ICH10R LPC Interface
 Controller
