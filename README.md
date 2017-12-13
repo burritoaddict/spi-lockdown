@@ -3,7 +3,8 @@
 This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
 
 Enabling FLOCKDN prevents SPI protected memory range registers from being
-modified.
+modified. (See: Section 21.4.2 in Intel® 8 Series/C220 Series Chipset
+Family Platform Controller Hub (PCH) - Datasheet)
 
 This module is meant to be used as part of a SecureBoot environment.
 Where it is hardened such that there is no /dev/mem access or privileged
@@ -27,10 +28,12 @@ Controller
 * Expose Flash Region Access Permissions Register
 * Expose Software Sequencing Flash Control Register
 * Expose flash descriptor region and mark unwritable
+* Re-write register values on wakeup from sleep
 * Instructions for statically linking into kernel
 
 ## References
 
+* https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/8-series-chipset-pch-datasheet.pdf
 * http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf
 * https://github.com/chipsec/chipsec/
 * https://www.kernel.org/doc/Documentation/PCI/pci.txt
