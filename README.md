@@ -1,7 +1,7 @@
 # x86 SPI Lockdown Kernel Module
 
 This module is meant to be used to prevent firmware modification as part of a
-[SecureBoot](https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html).
+[SecureBoot](https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html) authenticated execution environment.
 Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that there is [no /dev/mem access](https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Deny_reading/writing_to_/dev/kmem,_/dev/mem,_and_/dev/port) or privileged
 IO available. (because if you have those things you can just do this
 from userspace)
