@@ -49,13 +49,13 @@ Note: flockdn cannot be disabled after running sysctl without a 'reset'.
 ## TODO
 
 * Review datasheets for all the chipsets dumped into lpc_chipsets :(
-* Error handling and cleanup
+* ~~Error handling and cleanup~~
 * Support more ICH
-* Expose SPI protected memory ranges
-* Expose Flash Region Access Permissions Register
+* ~~Expose SPI protected memory ranges~~
+* ~~Expose Flash Region Access Permissions Register~~
 * Expose Software Sequencing Flash Control Register
 * Expose flash descriptor region and mark unwritable
-* Re-write register values on wakeup from sleep
+* Re-write register values on wakeup from sleep?
 * Instructions for statically linking into kernel
 
 ## References
