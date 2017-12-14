@@ -171,17 +171,17 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
   u32 offset;
 
   if(!strcmp(ctl->procname, "pr0")){
-    offset = SPIBASE_LPT_PR4_OFFSET;
-    reg = &pr4_value;
+    offset = SPIBASE_LPT_PR0_OFFSET;
+    reg = &pr0_value;
   } else if(!strcmp(ctl->procname, "pr1")){
-    offset = SPIBASE_LPT_PR4_OFFSET;
-    reg = &pr4_value;
+    offset = SPIBASE_LPT_PR1_OFFSET;
+    reg = &pr1_value;
   } else if(!strcmp(ctl->procname, "pr2")){
-    offset = SPIBASE_LPT_PR4_OFFSET;
-    reg = &pr4_value;
+    offset = SPIBASE_LPT_PR2_OFFSET;
+    reg = &pr2_value;
   } else if(!strcmp(ctl->procname, "pr3")){
-    offset = SPIBASE_LPT_PR4_OFFSET;
-    reg = &pr4_value;
+    offset = SPIBASE_LPT_PR3_OFFSET;
+    reg = &pr3_value;
   } else if(!strcmp(ctl->procname, "pr4")){
     offset = SPIBASE_LPT_PR4_OFFSET;
     reg = &pr4_value;
