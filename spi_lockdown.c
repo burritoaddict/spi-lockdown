@@ -76,6 +76,12 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
 
     hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
         sizeof(hsfsts.regval));
+
+    if(!hsfsts_target){
+      printk(KERN_ERR "ioremap_nocache failed\n");
+      return -1;
+    }
+
     hsfsts.regval = readw(hsfsts_target);
     flockdn_flag = hsfsts.hsf_status.flockdn;
     hsfsts.hsf_status.flockdn = 1;
