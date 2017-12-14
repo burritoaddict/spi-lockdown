@@ -1,18 +1,18 @@
 # x86 SPI Lockdown Kernel Module
 
-This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
+This module is meant to be used to prevent firmware modification as part of a
+[SecureBoot](https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html).
+Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that there is [no /dev/mem access](https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Deny_reading/writing_to_/dev/kmem,_/dev/mem,_and_/dev/port) or privileged
+IO available. (because if you have those things you can just do this
+from userspace)
 
 Enabling FLOCKDN prevents SPI protected memory range registers from being
 modified. (See: Section 21.4.2 in [Intel® 8 Series PCH
 Datasheet](https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/8-series-chipset-pch-datasheet.pdf))
 
-This module is meant to be used as part of a
-[SecureBoot](https://www.rodsbooks.com/efi-bootloaders/controlling-sb.html) environment.
-Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that there is [no /dev/mem access](https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Deny_reading/writing_to_/dev/kmem,_/dev/mem,_and_/dev/port) or privileged
-IO available. (because if you have those things you can just do this
-from userspace)
+This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
 
-Tested on debian, 3.16 kernel, and [ICH10R LPC Interface
+Tested on amd64 debian, 3.16 kernel, and [ICH10R LPC Interface
 Controller](https://www.intel.ca/content/dam/doc/datasheet/io-controller-hub-10-family-datasheet.pdf)
 
 ## Installation and Usage
