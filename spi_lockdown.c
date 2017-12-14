@@ -12,11 +12,11 @@ MODULE_DESCRIPTION("Creates sysctl interface to make SPI protected range "
     "(and other) registers immutable");
 MODULE_VERSION("0.1");
 
-u32 flockdn_flag = 0;
-union ich_hws_flash_status hsfsts;
-u32 spi_base = 0;
+static u32 flockdn_flag = 0;
+static union ich_hws_flash_status hsfsts;
+static u32 spi_base = 0;
 
-static ctl_table spi_lockdown_table[] = {
+static struct ctl_table spi_lockdown_table[] = {
   {
     .procname = "flockdn",
     .data = &flockdn_flag,
@@ -26,7 +26,7 @@ static ctl_table spi_lockdown_table[] = {
   }, {0}
 };
 
-static ctl_table spi_lockdown_dev_table[] = {
+static struct ctl_table spi_lockdown_dev_table[] = {
   {
     .procname = "spi_lockdown",
     .mode = 0555,
@@ -34,7 +34,7 @@ static ctl_table spi_lockdown_dev_table[] = {
   }, {0}
 };
 
-static ctl_table spi_lockdown_root_table[] = {
+static struct ctl_table spi_lockdown_root_table[] = {
   {
     .procname = "dev",
     .mode = 0555,
@@ -44,7 +44,7 @@ static ctl_table spi_lockdown_root_table[] = {
 
 static struct ctl_table_header *spi_lockdown_ctl_table_header;
 
-int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
+static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     void __user *buffer, size_t *lenp, loff_t *ppos)
 {
   int ret;
@@ -80,7 +80,7 @@ int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
   return 0;
 }
 
-int spi_lockdown_init(void){
+static int spi_lockdown_init(void){
   int i;
 
   spi_lockdown_ctl_table_header = register_sysctl_table(
@@ -140,7 +140,7 @@ int spi_lockdown_init(void){
   return -ENXIO;
 }
 
-void spi_lockdown_exit(void){
+static void spi_lockdown_exit(void){
   printk(KERN_INFO "spi_lockdown unloading\n");
 
   unregister_sysctl_table(spi_lockdown_ctl_table_header);

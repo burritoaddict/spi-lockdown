@@ -712,5 +712,5 @@ static const struct pci_device_id lpc_ich_ids[] = {
 	{ 0, },			/* End of list */
 };
 
-int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
+static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     void __user *buffer, size_t *lenp, loff_t *ppos);
