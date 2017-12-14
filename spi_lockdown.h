@@ -1,6 +1,15 @@
 #define SPIBASE_LPT 0x3800
 #define SPIBASE_LPT_SZ 512
+
 #define SPIBASE_LPT_HSFS_OFFSET 0x4
+
+#define SPIBASE_LPT_PR0_OFFSET 0x74
+#define SPIBASE_LPT_PR1_OFFSET 0x78
+#define SPIBASE_LPT_PR2_OFFSET 0x7C
+#define SPIBASE_LPT_PR3_OFFSET 0x80
+#define SPIBASE_LPT_PR4_OFFSET 0x84
+
+#define SPIBASE_LPT_FRAP_OFFSET 0x50
 
 #define SPIBASE_BYT		0x54
 #define SPIBASE_BYT_SZ		512
@@ -713,4 +722,10 @@ static const struct pci_device_id lpc_ich_ids[] = {
 };
 
 static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
+    void __user *buffer, size_t *lenp, loff_t *ppos);
+
+static int pr_sysctl_handler(struct ctl_table *ctl, int write,
+    void __user *buffer, size_t *lenp, loff_t *ppos);
+
+static int frap_sysctl_handler(struct ctl_table *ctl, int write,
     void __user *buffer, size_t *lenp, loff_t *ppos);

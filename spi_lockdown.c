@@ -1,8 +1,9 @@
+#include <linux/pci.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
-#include <linux/pci.h>
 #include <linux/sysctl.h>
+#include <linux/string.h>
 
 #include "spi_lockdown.h"
 
@@ -13,6 +14,13 @@ MODULE_DESCRIPTION("Creates sysctl interface to make SPI protected range "
 MODULE_VERSION("0.1");
 
 static u32 flockdn_flag = 0;
+static u16 pr0_value = 0;
+static u16 pr1_value = 0;
+static u16 pr2_value = 0;
+static u16 pr3_value = 0;
+static u16 pr4_value = 0;
+static u16 frap_value = 0;
+
 static union ich_hws_flash_status hsfsts;
 static u32 spi_base = 0;
 
@@ -23,6 +31,48 @@ static struct ctl_table spi_lockdown_table[] = {
     .maxlen = sizeof(int),
     .mode = 0644,
     .proc_handler = &flockdn_sysctl_handler,
+  },
+  {
+    .procname = "pr0",
+    .data = &pr0_value,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &pr_sysctl_handler,
+  },
+  {
+    .procname = "pr1",
+    .data = &pr1_value,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &pr_sysctl_handler,
+  },
+  {
+    .procname = "pr2",
+    .data = &pr2_value,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &pr_sysctl_handler,
+  },
+  {
+    .procname = "pr3",
+    .data = &pr3_value,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &pr_sysctl_handler,
+  },
+  {
+    .procname = "pr4",
+    .data = &pr4_value,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &pr_sysctl_handler,
+  },
+  {
+    .procname = "frap",
+    .data = &frap_value,
+    .maxlen = sizeof(int),
+    .mode = 0644,
+    .proc_handler = &frap_sysctl_handler,
   }, {0}
 };
 
@@ -44,6 +94,102 @@ static struct ctl_table spi_lockdown_root_table[] = {
 
 static struct ctl_table_header *spi_lockdown_ctl_table_header;
 
+static int read_mmio_u16(u32 addr, u16 *result){
+  void * read_target = 0;
+
+  read_target = ioremap_nocache(addr,
+    sizeof(*result));
+
+  if(!read_target){
+    printk(KERN_ERR "ioremap_nocache failed\n");
+    return -1;
+  }
+
+  *result = readw(read_target);
+  iounmap(read_target);
+
+  return 0;
+}
+
+static int write_mmio_u16(u32 addr, u16 value){
+  void * write_target = 0;
+
+  write_target = ioremap_nocache(addr,
+    sizeof(value));
+
+  if(!write_target){
+    printk(KERN_ERR "ioremap_nocache failed\n");
+    return -1;
+  }
+
+  writew(value, write_target);
+  iounmap(write_target);
+
+  return 0;
+}
+
+static int pr_sysctl_handler(struct ctl_table *ctl, int write,
+    void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+  int ret;
+
+  u16 *reg;
+  u32 offset;
+
+  if(!strcmp(ctl->procname, "pr0")){
+    offset = SPIBASE_LPT_PR4_OFFSET;
+    reg = &pr4_value;
+  } else if(!strcmp(ctl->procname, "pr1")){
+    offset = SPIBASE_LPT_PR4_OFFSET;
+    reg = &pr4_value;
+  } else if(!strcmp(ctl->procname, "pr2")){
+    offset = SPIBASE_LPT_PR4_OFFSET;
+    reg = &pr4_value;
+  } else if(!strcmp(ctl->procname, "pr3")){
+    offset = SPIBASE_LPT_PR4_OFFSET;
+    reg = &pr4_value;
+  } else if(!strcmp(ctl->procname, "pr4")){
+    offset = SPIBASE_LPT_PR4_OFFSET;
+    reg = &pr4_value;
+  }
+
+  if(write) {
+    write_mmio_u16(spi_base + offset, *reg);
+  }
+
+  read_mmio_u16(spi_base + offset, reg);
+
+  ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+
+  if(ret){
+    printk(KERN_ERR "proc_dointvec failed\n");
+    return -1;
+  }
+
+  return ret;
+}
+
+static int frap_sysctl_handler(struct ctl_table *ctl, int write,
+    void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+  int ret;
+
+  if(write) {
+    write_mmio_u16(spi_base + SPIBASE_LPT_FRAP_OFFSET, frap_value);
+  }
+
+  read_mmio_u16(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
+
+  ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+
+  if(ret){
+    printk(KERN_ERR "proc_dointvec failed\n");
+    return -1;
+  }
+
+  return ret;
+}
+
 static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -57,8 +203,6 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
   }
 
   if(write) {
-    void * hsfsts_target = 0;
-
     if(!flockdn_flag){
       printk(KERN_ERR "you can't disable FLOCKDN once it is enabled\n");
       flockdn_flag = 1;
@@ -73,20 +217,14 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     }
 
     printk(KERN_INFO "spi_lockdown writing FLOCKDN");
+    read_mmio_u16(spi_base + SPIBASE_LPT_HSFS_OFFSET, &hsfsts.regval);
+    hsfsts.hsf_status.flockdn = 1;
+    write_mmio_u16(spi_base + SPIBASE_LPT_HSFS_OFFSET, hsfsts.regval);
+    read_mmio_u16(spi_base + SPIBASE_LPT_HSFS_OFFSET, &hsfsts.regval);
 
-    hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
-        sizeof(hsfsts.regval));
-
-    if(!hsfsts_target){
-      printk(KERN_ERR "ioremap_nocache failed\n");
+    if(hsfsts.hsf_status.flockdn != 1){
       return -1;
     }
-
-    hsfsts.regval = readw(hsfsts_target);
-    flockdn_flag = hsfsts.hsf_status.flockdn;
-    hsfsts.hsf_status.flockdn = 1;
-    writew(hsfsts.regval, hsfsts_target);
-    iounmap(hsfsts_target);
   }
 
   return ret;
@@ -112,7 +250,6 @@ static int spi_lockdown_init(void){
     while ((dev = pci_get_device(lpc_ich_ids[i].vendor,
             lpc_ich_ids[i].device, dev))){
       u32 rcba, bcr;
-      void * hsfsts_target = 0;
       struct lpc_ich_priv *priv;
 
       priv = pci_get_drvdata(dev);
@@ -136,25 +273,18 @@ static int spi_lockdown_init(void){
           }
 
           printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
-
           spi_base = round_down(rcba, SPIBASE_LPT_SZ) + SPIBASE_LPT;
-
           printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
-
-          hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
-              sizeof(hsfsts.regval));
-
-          if(!hsfsts_target){
-            printk(KERN_ERR "ioremap_nocache failed\n");
-            spi_base = 0;
-            break;
-          }
-
-          hsfsts.regval = readw(hsfsts_target);
-
-          iounmap(hsfsts_target);
-
+          read_mmio_u16(spi_base + SPIBASE_LPT_HSFS_OFFSET, &hsfsts.regval);
           flockdn_flag = hsfsts.hsf_status.flockdn;
+
+          read_mmio_u16(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
+
+          read_mmio_u16(spi_base + SPIBASE_LPT_PR0_OFFSET, &pr0_value);
+          read_mmio_u16(spi_base + SPIBASE_LPT_PR1_OFFSET, &pr1_value);
+          read_mmio_u16(spi_base + SPIBASE_LPT_PR2_OFFSET, &pr2_value);
+          read_mmio_u16(spi_base + SPIBASE_LPT_PR3_OFFSET, &pr3_value);
+          read_mmio_u16(spi_base + SPIBASE_LPT_PR4_OFFSET, &pr4_value);
 
           return 0;
           break; /* unreachable */
