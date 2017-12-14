@@ -14,12 +14,12 @@ MODULE_DESCRIPTION("Creates sysctl interface to make SPI protected range "
 MODULE_VERSION("0.1");
 
 static u32 flockdn_flag = 0;
-static u16 pr0_value = 0;
-static u16 pr1_value = 0;
-static u16 pr2_value = 0;
-static u16 pr3_value = 0;
-static u16 pr4_value = 0;
-static u16 frap_value = 0;
+static u32 pr0_value = 0;
+static u32 pr1_value = 0;
+static u32 pr2_value = 0;
+static u32 pr3_value = 0;
+static u32 pr4_value = 0;
+static u32 frap_value = 0;
 
 static union ich_hws_flash_status hsfsts;
 static u32 spi_base = 0;
@@ -94,6 +94,40 @@ static struct ctl_table spi_lockdown_root_table[] = {
 
 static struct ctl_table_header *spi_lockdown_ctl_table_header;
 
+static int read_mmio_u32(u32 addr, u32 *result){
+  void * read_target = 0;
+
+  read_target = ioremap_nocache(addr,
+    sizeof(*result));
+
+  if(!read_target){
+    printk(KERN_ERR "ioremap_nocache failed\n");
+    return -1;
+  }
+
+  *result = readw(read_target);
+  iounmap(read_target);
+
+  return 0;
+}
+
+static int write_mmio_u32(u32 addr, u32 value){
+  void * write_target = 0;
+
+  write_target = ioremap_nocache(addr,
+    sizeof(value));
+
+  if(!write_target){
+    printk(KERN_ERR "ioremap_nocache failed\n");
+    return -1;
+  }
+
+  writew(value, write_target);
+  iounmap(write_target);
+
+  return 0;
+}
+
 static int read_mmio_u16(u32 addr, u16 *result){
   void * read_target = 0;
 
@@ -133,7 +167,7 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
 {
   int ret;
 
-  u16 *reg;
+  u32 *reg;
   u32 offset;
 
   if(!strcmp(ctl->procname, "pr0")){
@@ -153,18 +187,18 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
     reg = &pr4_value;
   }
 
-  if(write) {
-    write_mmio_u16(spi_base + offset, *reg);
-  }
-
-  read_mmio_u16(spi_base + offset, reg);
-
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
   if(ret){
     printk(KERN_ERR "proc_dointvec failed\n");
     return -1;
   }
+
+  if(write) {
+    write_mmio_u32(spi_base + offset, *reg);
+  }
+
+  read_mmio_u32(spi_base + offset, reg);
 
   return ret;
 }
@@ -174,18 +208,18 @@ static int frap_sysctl_handler(struct ctl_table *ctl, int write,
 {
   int ret;
 
-  if(write) {
-    write_mmio_u16(spi_base + SPIBASE_LPT_FRAP_OFFSET, frap_value);
-  }
-
-  read_mmio_u16(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
-
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
   if(ret){
     printk(KERN_ERR "proc_dointvec failed\n");
     return -1;
   }
+
+  if(write) {
+    write_mmio_u32(spi_base + SPIBASE_LPT_FRAP_OFFSET, frap_value);
+  }
+
+  read_mmio_u32(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
 
   return ret;
 }
@@ -278,13 +312,13 @@ static int spi_lockdown_init(void){
           read_mmio_u16(spi_base + SPIBASE_LPT_HSFS_OFFSET, &hsfsts.regval);
           flockdn_flag = hsfsts.hsf_status.flockdn;
 
-          read_mmio_u16(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
+          read_mmio_u32(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
 
-          read_mmio_u16(spi_base + SPIBASE_LPT_PR0_OFFSET, &pr0_value);
-          read_mmio_u16(spi_base + SPIBASE_LPT_PR1_OFFSET, &pr1_value);
-          read_mmio_u16(spi_base + SPIBASE_LPT_PR2_OFFSET, &pr2_value);
-          read_mmio_u16(spi_base + SPIBASE_LPT_PR3_OFFSET, &pr3_value);
-          read_mmio_u16(spi_base + SPIBASE_LPT_PR4_OFFSET, &pr4_value);
+          read_mmio_u32(spi_base + SPIBASE_LPT_PR0_OFFSET, &pr0_value);
+          read_mmio_u32(spi_base + SPIBASE_LPT_PR1_OFFSET, &pr1_value);
+          read_mmio_u32(spi_base + SPIBASE_LPT_PR2_OFFSET, &pr2_value);
+          read_mmio_u32(spi_base + SPIBASE_LPT_PR3_OFFSET, &pr3_value);
+          read_mmio_u32(spi_base + SPIBASE_LPT_PR4_OFFSET, &pr4_value);
 
           return 0;
           break; /* unreachable */
