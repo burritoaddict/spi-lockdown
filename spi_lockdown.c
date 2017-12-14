@@ -51,6 +51,11 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
 
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
+  if(ret){
+    printk(KERN_ERR "proc_dointvec failed\n");
+    return -1;
+  }
+
   if(write) {
     void * hsfsts_target = 0;
 
@@ -63,6 +68,7 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     if(!spi_base){
       printk(KERN_ERR "Cannot set FLOCKDN because we were unable to "
           "locate SPIBAR\n");
+      flockdn_flag = 0;
       return -1;
     }
 
@@ -77,16 +83,22 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
     iounmap(hsfsts_target);
   }
 
-  return 0;
+  return ret;
 }
 
 static int spi_lockdown_init(void){
   int i;
 
+  printk(KERN_INFO "spi_lockdown loading\n");
+
   spi_lockdown_ctl_table_header = register_sysctl_table(
       spi_lockdown_root_table);
 
-  printk(KERN_INFO "spi_lockdown loading\n");
+  if(spi_lockdown_ctl_table_header < 0){
+    printk(KERN_ERR "Failed to install sysctl handler\n");
+    return -1;
+  }
+
 
   for(i = 0; i < sizeof(lpc_ich_ids) / sizeof(struct pci_device_id); i++){
     struct pci_dev *dev = NULL;
@@ -99,27 +111,54 @@ static int spi_lockdown_init(void){
 
       priv = pci_get_drvdata(dev);
 
+      if(!priv){
+        printk(KERN_ERR "Failed pci_get_drvdata on vendor: %d, device: %d\n",
+            dev->vendor, dev->device);
+        continue;
+      }
+
       switch(lpc_chipset_info[priv->chipset].spi_type){
         case INTEL_SPI_LPT:
           spi_base = rcba = bcr = 0;
 
           printk(KERN_DEBUG "Got vendor: %d, device: %d\n", dev->vendor,
               dev->device);
-          pci_read_config_dword(dev, RCBABASE, &rcba);
+
+          if(pci_read_config_dword(dev, RCBABASE, &rcba) || !rcba){
+            printk(KERN_DEBUG "Failed to read RCBA\n");
+            break;
+          }
+
           printk(KERN_DEBUG "RCBA base: 0x%.8x\n", rcba);
+
           spi_base = round_down(rcba, SPIBASE_LPT_SZ) + SPIBASE_LPT;
+
           printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_base);
+
           hsfsts_target = ioremap_nocache(spi_base + SPIBASE_LPT_HSFS_OFFSET,
               sizeof(hsfsts.regval));
+
+          if(!hsfsts_target){
+            printk(KERN_ERR "ioremap_nocache failed\n");
+            spi_base = 0;
+            break;
+          }
+
           hsfsts.regval = readw(hsfsts_target);
-          flockdn_flag = hsfsts.hsf_status.flockdn;
+
           iounmap(hsfsts_target);
+
+          flockdn_flag = hsfsts.hsf_status.flockdn;
 
           return 0;
           break; /* unreachable */
 
         case INTEL_SPI_BYT:
-          pci_read_config_dword(dev, SPIBASE_BYT, &spi_base);
+          if(pci_read_config_dword(dev, SPIBASE_BYT, &spi_base) || !spi_base){
+            printk(KERN_DEBUG "Failed to read SPIBAR\n");
+            break;
+          }
+
           spi_base = spi_base & ~(SPIBASE_BYT_SZ - 1);
           // TODO: investigate if we can actually read HSFS from this.
 
