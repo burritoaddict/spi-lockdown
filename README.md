@@ -18,8 +18,6 @@ Datasheet](https://www.intel.com/content/dam/www/public/us/en/documents/datashee
 
 Read [these slides](http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf) for a full description of how these mechanisms work.
 
-This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
-
 Tested on amd64 debian, 3.16 kernel, and [ICH10R LPC Interface
 Controller](https://www.intel.ca/content/dam/doc/datasheet/io-controller-hub-10-family-datasheet.pdf)
 
