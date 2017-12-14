@@ -422,6 +422,7 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 	[LPC_WBG] = {
 		.name = "Wellsburg",
 		.iTCO_version = 2,
+    .spi_type = INTEL_SPI_LPT,
 	},
 	[LPC_AVN] = {
 		.name = "Avoton SoC",
