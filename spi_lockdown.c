@@ -167,8 +167,8 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
 {
   int ret;
 
-  u32 *reg;
-  u32 offset;
+  u32 *reg = NULL;
+  u32 offset = 0;
 
   if(!strcmp(ctl->procname, "pr0")){
     offset = SPIBASE_LPT_PR0_OFFSET;
@@ -185,6 +185,10 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
   } else if(!strcmp(ctl->procname, "pr4")){
     offset = SPIBASE_LPT_PR4_OFFSET;
     reg = &pr4_value;
+  }
+
+  if(!offset || !reg){
+    return -1;
   }
 
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
@@ -237,6 +241,8 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
   }
 
   if(write) {
+    printk(KERN_DEBUG "setting FLOCKDN\n");
+
     if(!flockdn_flag){
       printk(KERN_ERR "you can't disable FLOCKDN once it is enabled\n");
       flockdn_flag = 1;
