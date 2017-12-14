@@ -97,6 +97,8 @@ static struct ctl_table_header *spi_lockdown_ctl_table_header;
 static int read_mmio_u32(u32 addr, u32 *result){
   void * read_target = 0;
 
+  printk(KERN_DEBUG "reading 0x%.8x\n", addr);
+
   read_target = ioremap_nocache(addr,
     sizeof(*result));
 
@@ -113,6 +115,8 @@ static int read_mmio_u32(u32 addr, u32 *result){
 
 static int write_mmio_u32(u32 addr, u32 value){
   void * write_target = 0;
+
+  printk(KERN_DEBUG "writing %d to 0x%.8x\n", value, addr);
 
   write_target = ioremap_nocache(addr,
     sizeof(value));
@@ -131,6 +135,8 @@ static int write_mmio_u32(u32 addr, u32 value){
 static int read_mmio_u16(u32 addr, u16 *result){
   void * read_target = 0;
 
+  printk(KERN_DEBUG "reading 0x%.8x\n", addr);
+
   read_target = ioremap_nocache(addr,
     sizeof(*result));
 
@@ -147,6 +153,8 @@ static int read_mmio_u16(u32 addr, u16 *result){
 
 static int write_mmio_u16(u32 addr, u16 value){
   void * write_target = 0;
+
+  printk(KERN_DEBUG "writing %d to 0x%.4x\n", value, addr);
 
   write_target = ioremap_nocache(addr,
     sizeof(value));
@@ -191,6 +199,8 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
     return -1;
   }
 
+  read_mmio_u32(spi_base + offset, reg);
+
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
   if(ret){
@@ -199,6 +209,7 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
   }
 
   if(write) {
+    printk(KERN_DEBUG "writing %s\n", ctl->procname);
     write_mmio_u32(spi_base + offset, *reg);
   }
 
@@ -212,6 +223,7 @@ static int frap_sysctl_handler(struct ctl_table *ctl, int write,
 {
   int ret;
 
+  read_mmio_u32(spi_base + SPIBASE_LPT_FRAP_OFFSET, &frap_value);
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
   if(ret){
@@ -233,6 +245,7 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
 {
   int ret;
 
+  read_mmio_u16(spi_base + SPIBASE_LPT_HSFS_OFFSET, &hsfsts.regval);
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
   if(ret){
