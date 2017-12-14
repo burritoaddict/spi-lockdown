@@ -6,9 +6,17 @@ Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that
 IO available. (because if you have those things you can just do this
 from userspace)
 
+Setting Flash Regions Access Permission Register controls which regions
+of flash memory can be read and written.
+
+Setting Protected Ranges Registers controls which address ranges are
+read or write protected.
+
 Enabling FLOCKDN prevents SPI protected memory range registers from being
 modified. (See: Section 21.4.2 in [Intel® 8 Series PCH
 Datasheet](https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/8-series-chipset-pch-datasheet.pdf))
+
+Read [these slides](http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf) for a full description of how these mechanisms work.
 
 This kernel module exposes the FLOCKDN bit on x86 systems via sysctl.
 
@@ -26,6 +34,17 @@ Controller](https://www.intel.ca/content/dam/doc/datasheet/io-controller-hub-10-
 
 Note: flockdn cannot be disabled after running sysctl without a 'reset'.
 [On some systems that means waking from sleep](https://support.apple.com/en-ca/HT204934)
+
+### sysctl interfaces
+
+* dev.spi_lockdown.flockdn - FLOCKDN bit in Hardware Sequencing Flash
+  Status Register
+* dev.spi_lockdown.frap - Flash Regions Access Permissions Register
+* dev.spi_lockdown.pr0 - Protected Range 0 Register
+* dev.spi_lockdown.pr1 - Protected Range 1 Register
+* dev.spi_lockdown.pr2 - Protected Range 2 Register
+* dev.spi_lockdown.pr3 - Protected Range 3 Register
+* dev.spi_lockdown.pr4 - Protected Range 4 Register
 
 ## TODO
 
