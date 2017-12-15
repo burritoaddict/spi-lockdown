@@ -107,7 +107,7 @@ static int read_mmio_u32(u32 addr, u32 *result){
     return -1;
   }
 
-  *result = readw(read_target);
+  *result = readl(read_target);
   iounmap(read_target);
 
   return 0;
@@ -126,7 +126,7 @@ static int write_mmio_u32(u32 addr, u32 value){
     return -1;
   }
 
-  writew(value, write_target);
+  writel(value, write_target);
   iounmap(write_target);
 
   return 0;
