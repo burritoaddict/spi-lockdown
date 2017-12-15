@@ -325,7 +325,7 @@ static int spi_lockdown_init(void){
           printk(KERN_DEBUG "Got vendor: %d, device: %d\n",
               spi_lockdown_data.ich_dev->vendor, spi_lockdown_data.ich_dev->device);
 
-          if(pci_read_config_dword(spi_lockdown_data.ich_dev, RCBABASE,
+          if(pci_read_config_dword(spi_lockdown_data.ich_dev, RCBA_OFFSET,
                 &spi_lockdown_data.rcba) || !spi_lockdown_data.rcba)
           {
             printk(KERN_DEBUG "Failed to read RCBA\n");

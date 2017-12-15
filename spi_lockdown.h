@@ -15,7 +15,7 @@
 #define SPIBASE_BYT_SZ		512
 #define SPIBASE_BYT_EN		BIT(1)
 
-#define RCBABASE 0xf0
+#define RCBA_OFFSET 0xf0
 
 union ich_protected_range_register {
   struct ich_pr {
