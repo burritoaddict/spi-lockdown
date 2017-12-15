@@ -17,18 +17,76 @@
 
 #define RCBABASE 0xf0
 
+union ich_protected_range_register {
+  struct ich_pr {
+    u16 base_addr:13;/* bit 0:12 base protection address*/
+    u16 reserved1:2;/* bit 13:14 reserved */
+    u16 read_protect_enable:1; /* bit 15 read protect */
+    u16 range_limit:13;/* bit 16:28 protection range top */
+    u16 reserved2:2;/* bit 29:30 reserved */
+    u16 write_protect_enable:1;/* bit 31 write protect */
+  } bits;
+  u32 regval;
+};
+
+union ich_flash_region_access_permissions {
+  struct ich_frap {
+    union {
+      struct ich_brra { /* Bios Region Read Access */
+        u8 reserved1:1;/* bit 0 reserved */
+        u8 bios:1;/* bit 1 BIOS */
+        u8 management_engine:1;/* bit 2 intelme */
+        u8 gbe:1;/* bit 3 gigbit ethernet */
+        u8 reserved2:4; /* bit 4:7 reserved */
+      } bits;
+      u8 regval;
+    } brra;
+    union {
+      struct ich_brwa { /* BIOS Region Write Access */
+        u8 reserved1:1;/* bit 0 reserved */
+        u8 bios:1;/* bit 1 BIOS */
+        u8 management_engine:1;/* bit 2 intelme */
+        u8 gbe:1;/* bit 3 gigbit ethernet */
+        u8 reserved2:4; /* bit 4:7 reserved */
+      } bits;
+      u8 regval;
+    } brwa;
+    union { /* BIOS Master Read Access Grant */
+      struct ich_bmrag {
+        u8 reserved1:1;/* bit 0 reserved */
+        u8 bios:1;/* bit 1 BIOS */
+        u8 management_engine:1;/* bit 2 intelme */
+        u8 gbe:1;/* bit 3 gigbit ethernet */
+        u8 reserved2:4; /* bit 4:7 reserved */
+      } bits;
+      u8 regval;
+    } bmrag;
+    union { /* BIOS Master Write Access Grant */
+      struct ich_bmwag {
+        u8 reserved1:1;/* bit 0 reserved */
+        u8 bios:1;/* bit 1 BIOS */
+        u8 management_engine:1;/* bit 2 intelme */
+        u8 gbe:1;/* bit 3 gigbit ethernet */
+        u8 reserved2:4; /* bit 4:7 reserved */
+      } bits;
+      u8 regval;
+    } bmwag;
+  } frap;
+  u32 regval;
+};
+
 union ich_hws_flash_status {
   struct ich8_hsfsts {
       u16 flcdone:1;/* bit 0 Flash Cycle Done */
       u16 flcerr:1;/* bit 1             Flash Cycle Error */
       u16 dael:1;/* bit 2 Direct Access error Log */
-            u16 berasesz:2;/* bit 4:3 Sector Erase Size */
-            u16 flcinprog:1;/*bit bit 5 flash cycle in Progress */
-            u16 reserved1:2;/* bit 13:6 Reserved */
-            u16 reserved2:6;/* bit 13:6 Reserved */
-            u16 fldesvalid:1;/*reserved2 bit 14 Flash Descriptor Valid */
-            u16 flockdn:1;/* bit 15 Flash Config Lock-Down */
-  } hsf_status;
+      u16 berasesz:2;/* bit 4:3 Sector Erase Size */
+      u16 flcinprog:1;/*bit bit 5 flash cycle in Progress */
+      u16 reserved1:2;/* bit 13:6 Reserved */
+      u16 reserved2:6;/* bit 13:6 Reserved */
+      u16 fldesvalid:1;/*reserved2 bit 14 Flash Descriptor Valid */
+      u16 flockdn:1;/* bit 15 Flash Config Lock-Down */
+  } bits;
   u16 regval;
 };
 
