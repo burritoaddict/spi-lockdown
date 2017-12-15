@@ -31,9 +31,9 @@ Controller](https://www.intel.ca/content/dam/doc/datasheet/io-controller-hub-10-
     make
     insmod spi_lockdown.ko
     sysctl -w dev.spi_lockdown.pr0=2415886336   # write protect entire
-region (0x8fff8000)
+                                                region (0x8fff8000)
     sysctl -w dev.spi_lockdown.flockdn=1        # prevent SPI protection
-modifications
+                                                modifications
 
 Note: flockdn cannot be disabled after running sysctl without a 'reset'.
 [On some systems that means waking from sleep](https://support.apple.com/en-ca/HT204934)
