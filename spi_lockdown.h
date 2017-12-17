@@ -296,6 +296,7 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 		.name = "ICH8 or ICH8R",
 		.iTCO_version = 2,
 		.gpio_version = ICH_V7_GPIO,
+    .spi_type = INTEL_SPI_LPT,
 	},
 	[LPC_ICH8DH] = {
 		.name = "ICH8DH",
