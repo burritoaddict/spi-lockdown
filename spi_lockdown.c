@@ -5,6 +5,7 @@
 #include <linux/sysctl.h>
 #include <linux/string.h>
 #include <linux/kobject.h>
+#include <linux/spinlock.h>
 
 #include "spi_lockdown.h"
 
@@ -98,7 +99,7 @@ static struct ctl_table_header *spi_lockdown_ctl_table_header;
 static int read_mmio_u32(u32 addr, u32 *result){
   void * read_target = 0;
 
-  printk(KERN_DEBUG "reading 0x%.8x\n", addr);
+  pr_debug("reading 0x%.8x\n", addr);
 
   read_target = ioremap_nocache(addr,
     sizeof(*result));
@@ -117,7 +118,7 @@ static int read_mmio_u32(u32 addr, u32 *result){
 static int write_mmio_u32(u32 addr, u32 value){
   void * write_target = 0;
 
-  printk(KERN_DEBUG "writing %d to 0x%.8x\n", value, addr);
+  pr_debug("writing %d to 0x%.8x\n", value, addr);
 
   write_target = ioremap_nocache(addr,
     sizeof(value));
@@ -136,7 +137,7 @@ static int write_mmio_u32(u32 addr, u32 value){
 static int read_mmio_u16(u32 addr, u16 *result){
   void * read_target = 0;
 
-  printk(KERN_DEBUG "reading 0x%.8x\n", addr);
+  pr_debug("reading 0x%.8x\n", addr);
 
   read_target = ioremap_nocache(addr,
     sizeof(*result));
@@ -155,7 +156,7 @@ static int read_mmio_u16(u32 addr, u16 *result){
 static int write_mmio_u16(u32 addr, u16 value){
   void * write_target = 0;
 
-  printk(KERN_DEBUG "writing %d to 0x%.4x\n", value, addr);
+  pr_debug("writing %d to 0x%.4x\n", value, addr);
 
   write_target = ioremap_nocache(addr,
     sizeof(value));
@@ -210,7 +211,7 @@ static int pr_sysctl_handler(struct ctl_table *ctl, int write,
   }
 
   if(write) {
-    printk(KERN_DEBUG "writing %s\n", ctl->procname);
+    pr_debug("writing %s\n", ctl->procname);
     write_mmio_u32(spi_lockdown_data.spibar + offset, *reg);
   }
 
@@ -260,7 +261,7 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
   }
 
   if(write) {
-    printk(KERN_DEBUG "setting FLOCKDN\n");
+    pr_debug("setting FLOCKDN\n");
 
     if(!spi_lockdown_data.hsfsts.bits.flockdn){
       printk(KERN_ERR "you can't disable FLOCKDN once it is enabled\n");
@@ -299,6 +300,7 @@ static int spi_lockdown_init(void){
 
   memset(&spi_lockdown_data, '\0', sizeof(spi_lockdown_data));
 
+
   spi_lockdown_ctl_table_header = register_sysctl_table(
       spi_lockdown_root_table);
 
@@ -322,21 +324,21 @@ static int spi_lockdown_init(void){
 
       switch(lpc_chipset_info[spi_lockdown_data.ich_priv->chipset].spi_type){
         case INTEL_SPI_LPT:
-          printk(KERN_DEBUG "Got vendor: %d, device: %d\n",
+          pr_debug("Got vendor: %d, device: %d\n",
               spi_lockdown_data.ich_dev->vendor, spi_lockdown_data.ich_dev->device);
 
           if(pci_read_config_dword(spi_lockdown_data.ich_dev, RCBA_OFFSET,
                 &spi_lockdown_data.rcba) || !spi_lockdown_data.rcba)
           {
-            printk(KERN_DEBUG "Failed to read RCBA\n");
+            pr_debug("Failed to read RCBA\n");
             break;
           }
 
-          printk(KERN_DEBUG "RCBA base: 0x%.8x\n", spi_lockdown_data.rcba);
+          pr_debug("RCBA base: 0x%.8x\n", spi_lockdown_data.rcba);
           spi_lockdown_data.spibar = round_down(spi_lockdown_data.rcba,
               SPIBASE_LPT_SZ) + SPIBASE_LPT;
 
-          printk(KERN_DEBUG "SPI base: 0x%.8x\n", spi_lockdown_data.spibar);
+          pr_debug("SPI base: 0x%.8x\n", spi_lockdown_data.spibar);
           read_mmio_u16(spi_lockdown_data.spibar + SPIBASE_LPT_HSFS_OFFSET, &spi_lockdown_data.hsfsts.regval);
 
           read_mmio_u32(spi_lockdown_data.spibar + SPIBASE_LPT_FRAP_OFFSET,
@@ -357,7 +359,6 @@ static int spi_lockdown_init(void){
 
         case INTEL_SPI_BYT:
         case INTEL_SPI_BXT:
-// http://elixir.free-electrons.com/linux/latest/source/drivers/mfd/lpc_ich.c#L1128
         default:
           printk(
             KERN_ERR
