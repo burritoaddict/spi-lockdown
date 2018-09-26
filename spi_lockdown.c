@@ -20,6 +20,7 @@ static struct {
  union ich_protected_range_register pr[5];
  union ich_flash_region_access_permissions frap;
  union ich_hws_flash_status hsfsts;
+ u32 flockdn;
  u32 spibar;
  u32 rcba;
  struct pci_dev *ich_dev;
@@ -28,9 +29,9 @@ static struct {
 
 static struct ctl_table spi_lockdown_table[] = {
   {
-    .procname = "hsfsts",
-    .data = &spi_lockdown_data.hsfsts.regval,
-    .maxlen = sizeof(spi_lockdown_data.hsfsts),
+    .procname = "flockdn",
+    .data = &spi_lockdown_data.flockdn,
+    .maxlen = sizeof(spi_lockdown_data.flockdn),
     .mode = 0644,
     .proc_handler = &flockdn_sysctl_handler,
   },
@@ -253,6 +254,7 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
 
   read_mmio_u16(spi_lockdown_data.spibar + SPIBASE_LPT_HSFS_OFFSET,
       &spi_lockdown_data.hsfsts.regval);
+
   ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
   if(ret){
@@ -263,7 +265,7 @@ static int flockdn_sysctl_handler(struct ctl_table *ctl, int write,
   if(write) {
     pr_debug("setting FLOCKDN\n");
 
-    if(!spi_lockdown_data.hsfsts.bits.flockdn){
+    if(spi_lockdown_data.hsfsts.bits.flockdn){
       printk(KERN_ERR "you can't disable FLOCKDN once it is enabled\n");
       return -1;
     }
@@ -340,6 +342,10 @@ static int spi_lockdown_init(void){
 
           pr_debug("SPI base: 0x%.8x\n", spi_lockdown_data.spibar);
           read_mmio_u16(spi_lockdown_data.spibar + SPIBASE_LPT_HSFS_OFFSET, &spi_lockdown_data.hsfsts.regval);
+
+	  if(spi_lockdown_data.hsfsts.bits.flockdn){
+            spi_lockdown_data.flockdn = 1;
+	  }
 
           read_mmio_u32(spi_lockdown_data.spibar + SPIBASE_LPT_FRAP_OFFSET,
               &spi_lockdown_data.frap.regval);
