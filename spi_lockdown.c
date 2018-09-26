@@ -75,7 +75,7 @@ static struct ctl_table spi_lockdown_table[] = {
     .maxlen = sizeof(spi_lockdown_data.frap),
     .mode = 0644,
     .proc_handler = &frap_sysctl_handler,
-  }, {0}
+  }, {}
 };
 
 static struct ctl_table spi_lockdown_dev_table[] = {
@@ -83,7 +83,7 @@ static struct ctl_table spi_lockdown_dev_table[] = {
     .procname = "spi_lockdown",
     .mode = 0555,
     .child = spi_lockdown_table
-  }, {0}
+  }, {}
 };
 
 static struct ctl_table spi_lockdown_root_table[] = {
@@ -91,7 +91,7 @@ static struct ctl_table spi_lockdown_root_table[] = {
     .procname = "dev",
     .mode = 0555,
     .child = spi_lockdown_dev_table
-  }, {0}
+  }, {}
 };
 
 static struct ctl_table_header *spi_lockdown_ctl_table_header;
