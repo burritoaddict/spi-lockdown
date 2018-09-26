@@ -296,7 +296,7 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 		.name = "ICH8 or ICH8R",
 		.iTCO_version = 2,
 		.gpio_version = ICH_V7_GPIO,
-    .spi_type = INTEL_SPI_LPT,
+                .spi_type = INTEL_SPI_LPT,
 	},
 	[LPC_ICH8DH] = {
 		.name = "ICH8DH",
@@ -357,7 +357,7 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 		.name = "ICH10R",
 		.iTCO_version = 2,
 		.gpio_version = ICH_V10CONS_GPIO,
-    .spi_type = INTEL_SPI_LPT,
+                .spi_type = INTEL_SPI_LPT,
 	},
 	[LPC_ICH10D] = {
 		.name = "ICH10D",
@@ -490,7 +490,7 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 	[LPC_WBG] = {
 		.name = "Wellsburg",
 		.iTCO_version = 2,
-    .spi_type = INTEL_SPI_LPT,
+                .spi_type = INTEL_SPI_LPT,
 	},
 	[LPC_AVN] = {
 		.name = "Avoton SoC",
@@ -501,7 +501,7 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 	[LPC_BAYTRAIL] = {
 		.name = "Bay Trail SoC",
 		.iTCO_version = 3,
-		.spi_type = INTEL_SPI_BYT,
+		.spi_type = INTEL_SPI_LPT, /* maybe inaccurate but the datasheet matches */
 	},
 	[LPC_COLETO] = {
 		.name = "Coleto Creek",
