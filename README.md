@@ -6,17 +6,20 @@ Where it is [hardened](https://pax.grsecurity.net/docs/pax-future.txt) such that
 IO available. (because if you have those things you can just do this
 from userspace)
 
-Read [these slides](http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf) for a full description of how these mechanisms work.
+[These awesome slides](http://opensecuritytraining.info/IntroBIOS_files/Day2_03_Advanced%20x86%20-%20BIOS%20and%20SMM%20Internals%20-%20SPI%20Flash%20Protection%20Mechanisms.pdf) give a full description of how this mechanism works.
 
 Tested on amd64 debian, 3.16 kernel, and [ICH10R LPC Interface
 
-Setting Flash Regions Access Permission Register controls which regions
+With this miraculous technology you can:
+* set Flash Regions Access Permission Register to control which regions
 of flash memory can be read and written.
-
-Setting Protected Ranges Registers controls which address ranges are
+* set Protected Ranges Registers to control which address ranges are
 read or write protected.
 
-Enabling FLOCKDN prevents SPI protected memory range registers from being
+ALL FROM THE COMFORT OF RING 3!
+
+But wait, there's more!
+* Enabling FLOCKDN prevents SPI protected memory range registers from being
 modified. (See: Section 21.4.2 in [Intel® 8 Series PCH
 Datasheet](https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/8-series-chipset-pch-datasheet.pdf))
 
